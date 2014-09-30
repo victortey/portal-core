@@ -38,6 +38,13 @@ Ext.define('portal.widgets.panel.LayerPanel', {
             handler : Ext.bind(this._downloadClickHandler,this)
         });
         
+        
+        this.linkToVgl = new Ext.Action({
+            text : 'Link to VGL Analytics',
+            iconCls : 'link',
+            handler : Ext.bind(this._analyticsClickHandler,this)
+        });
+        
 
         Ext.apply(cfg, {
             columns : [{
@@ -98,7 +105,8 @@ Ext.define('portal.widgets.panel.LayerPanel', {
                         var menu = Ext.create('Ext.menu.Menu', {
                             items: [
                                     me.removeAction,
-                                    me.downloadLayerAction
+                                    me.downloadLayerAction,
+                                    me.linkToVgl
                                     ]                
                         });
                         menu.showAt(e.getXY());
@@ -117,7 +125,8 @@ Ext.define('portal.widgets.panel.LayerPanel', {
                 contextMenu : Ext.create('Ext.menu.Menu', {
                     items: [
                             this.removeAction,
-                            this.downloadLayerAction
+                            this.downloadLayerAction,
+                            this.linkToVgl
                             ]                
                 })
             }],
@@ -282,6 +291,25 @@ Ext.define('portal.widgets.panel.LayerPanel', {
             downloader.downloadData(layer, onlineResources, renderedFilterer, currentFilterer);
 
         }
+    },
+    
+    _analyticsClickHandler : function(){
+        var mss = Ext.create('portal.util.permalink.MapStateSerializer');
+        mss.addMapState(this.map);
+        mss.addLayers(this.getStore());
+        mss.serialize(function(state, version) {
+            var urlParams = Ext.Object.fromQueryString(location.search.substring(1));
+            urlParams.s = state;
+            if (version) {
+                urlParams.v = version;
+            }
+            var linkedUrl = "http://vgl.auscope.org/VGL-Portal/gmap.html"
+
+            var params = Ext.Object.toQueryString(urlParams);
+          
+            linkedUrl = Ext.urlAppend(linkedUrl, decodeURIComponent(params));
+            window.open(linkedUrl,'_blank');
+        });
     },
 
     /**
